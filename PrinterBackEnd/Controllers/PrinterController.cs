@@ -1,13 +1,15 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace PrinterBackEnd.Controllers
+
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PrinterController : Controller
+    public class PrinterController : ControllerBase
     {
         private readonly IConfiguration _configuration;
 
@@ -17,10 +19,9 @@ namespace PrinterBackEnd.Controllers
         }
 
         [HttpPost("PrintLabel")]
-        public IActionResult PrintLabel([FromBody] PrintRequest request)
+        public IActionResult PrintLabel()
         {
-            // Validate and send print command
-            var printResult = SendToPrinter(request);
+            var printResult = SendToPrinter();
             if (printResult)
             {
                 return Ok("Print job successful.");
@@ -31,17 +32,19 @@ namespace PrinterBackEnd.Controllers
             }
         }
 
-        private bool SendToPrinter(PrintRequest request)
+        private bool SendToPrinter()
         {
             string ipAddress = _configuration["PrinterSettings:IPAddress"];
             int port = int.Parse(_configuration["PrinterSettings:Port"]);
 
             try
             {
+                // Predefined print command
+                string printCommand = "\x02\x1BA\x1BA3V+00000H+0000\x1BCS4\x1B#F5\x1BA1V00889H1248\x1BZ\x03\x02\x1BA\x1BPS\x1BWKLabel\x1B%0\x1BH0538\x1BV00410\x1BGB0090030\x03 þ\x01€ 8 0\x03\x03ÿ\x81€ 8 0\x03 ƒÁ€ l 0\x03\x06 Á€ l 0\x03\x0C a€ l 0\x03\x0C a€ Æ 0\x03\x18 1€ Æ 0\x03\x18 1€\x01Ç ?ÿ\x18 1€\x01ƒ ?ÿ\x18 1€\x01ƒ 0\x03\x18 1€\x03ÿ€0\x03\x18 1€\x03ÿ€0\x03\x0C a€\x03\x01€0\x03\x0C a€\x06 À0\x03\x06 Á€\x06 À0\x03 ƒÁ€\x06 À0\x03\x01ÿ\x81ÿÌ `0\x03 þ\x01ÿÌ `                                                      \x1BQ1\x1BZ\x03";
+
                 using (TcpClient client = new TcpClient(ipAddress, port))
                 using (NetworkStream stream = client.GetStream())
                 {
-                    string printCommand = CreatePrintCommand(request);
                     byte[] data = Encoding.ASCII.GetBytes(printCommand);
                     stream.Write(data, 0, data.Length);
                     stream.Flush();
@@ -56,36 +59,6 @@ namespace PrinterBackEnd.Controllers
             }
         }
 
-        private string CreatePrintCommand(PrintRequest request)
-        {
-            // Construct SBPL commands based on the provided documentation
-            StringBuilder sbplCommand = new StringBuilder();
-            sbplCommand.Append("\x1B" + "A\x0A"); // Start command
-            sbplCommand.Append("\x1B" + "CS\x0A"); // Clear buffer
-
-            // Print each field at specified positions
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0100\x1B" + "L0101\x1B" + "K\"" + request.Area + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0200\x1B" + "L0101\x1B" + "K\"" + request.Fecha + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0300\x1B" + "L0101\x1B" + "K\"" + request.Producto + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0400\x1B" + "L0101\x1B" + "K\"" + request.Turno + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0500\x1B" + "L0101\x1B" + "K\"" + request.Operador + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0600\x1B" + "L0101\x1B" + "K\"" + request.PesoBruto + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0700\x1B" + "L0101\x1B" + "K\"" + request.PesoNeto + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0800\x1B" + "L0101\x1B" + "K\"" + request.PesoTarima + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V0900\x1B" + "L0101\x1B" + "K\"" + request.Cantidad + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V1000\x1B" + "L0101\x1B" + "K\"" + request.CodigoTrazabilidad + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V1100\x1B" + "L0101\x1B" + "K\"" + request.Lote + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V1200\x1B" + "L0101\x1B" + "K\"" + request.Qr + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V1300\x1B" + "L0101\x1B" + "K\"" + request.FechaRevision + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V1400\x1B" + "L0101\x1B" + "K\"" + request.IdRevision + "\"\x0A");
-            sbplCommand.Append("\x1B" + "H0100\x1B" + "V1500\x1B" + "L0101\x1B" + "K\"EPC: " + request.EPC + "\"\x0A");
-
-            sbplCommand.Append("\x1B" + "Q1\x0A"); // Print quantity
-            sbplCommand.Append("\x1B" + "Z\x0A"); // End command
-            return sbplCommand.ToString();
-        }
-
-        //Endpoint to clear buffer and printer queue
         [HttpGet("ClearBufferAndQueue")]
         public IActionResult ClearBufferAndQueue()
         {
@@ -112,38 +85,11 @@ namespace PrinterBackEnd.Controllers
             }
         }
 
-        //Create method to clear buffer and printer queue
         private string ClearBufferAndQueue2()
         {
             return "\x1B" + "CS\x0A";
         }
 
-        private string CreateSimplePrintCommand()
-        {
-            return "\x1B" + "A\x0A\x1B" + "H100\x1B" + "V100\x1B" + "L0101\x1B" + "K\"TEST PRINT\"\x0A\x1B" + "Q1\x0A\x1B" + "Z\x0A";
-        }
-
-        public class PrintRequest
-        {
-            public string IdEtiqueta { get; set; }
-            public string Area { get; set; }
-            public string Fecha { get; set; }
-            public string Producto { get; set; }
-            public string Turno { get; set; }
-            public string Operador { get; set; }
-            public string PesoBruto { get; set; }
-            public string PesoNeto { get; set; }
-            public string PesoTarima { get; set; }
-            public string Cantidad { get; set; }
-            public string CodigoTrazabilidad { get; set; }
-            public string Lote { get; set; }
-            public string Qr { get; set; }
-            public string FechaRevision { get; set; }
-            public string IdRevision { get; set; }
-            public string EPC { get; set; }
-        }
-
-        // Endpoint to detect printer status
         [HttpGet("PrinterStatus")]
         public IActionResult PrinterStatus()
         {
@@ -174,9 +120,5 @@ namespace PrinterBackEnd.Controllers
         {
             return "\x1B" + "CS\x0A";
         }
-
-        // Endpoint to detect all usb printers using libusbnet
-       
-
     }
 }
