@@ -1,14 +1,10 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using PrinterBackEnd.Data;
-using Serilog;
-using System;
-using System.Globalization;
+using PrinterBackEnd.Models;
+using PrinterBackEnd.Services;
 
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
-CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+//using PrinterBackEnd.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +16,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 // Add services to the container.
+builder.Services.AddControllersWithViews();
+
 
 // Add DbContext
 builder.Services.AddDbContext<DataContext>(options =>
@@ -44,16 +42,26 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add PrinterService
+builder.Services.Configure<PrinterSettings>(builder.Configuration.GetSection("Printer"));
+builder.Services.AddSingleton<PrinterService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+    });
 }
 
 app.UseCors();
+
+// Enable WebSockets
+app.UseWebSockets();
 
 app.UseHttpsRedirection();
 
