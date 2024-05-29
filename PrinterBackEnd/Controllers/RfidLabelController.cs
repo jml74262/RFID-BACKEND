@@ -18,11 +18,12 @@ namespace PrinterBackEnd.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProdEtiquetasRFID>>> GetCatArea()
+        public async Task<ActionResult<IEnumerable<ProdEtiquetasRFID>>> GetRFIDLabels()
         {
             try
             {
-                return await _context.ProdEtiquetasRFID.ToListAsync();
+                var rfidLabels = await _context.ProdEtiquetasRFID.ToListAsync();
+                return Ok(rfidLabels);
             }
             catch (Exception ex)
             {
