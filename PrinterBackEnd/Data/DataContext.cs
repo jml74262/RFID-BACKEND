@@ -24,6 +24,7 @@ namespace PrinterBackEnd.Data
         public DbSet<CatOrden> Cat_Ordenes { get; set; }
         public DbSet<CatProducto> Cat_Productos { get; set; }
         public DbSet<CatTurno> Cat_Turnos { get; set; }
+        public DbSet<ProdEtiquetasRFID> ProdEtiquetasRFID { get; set; }
 
     }
 }
