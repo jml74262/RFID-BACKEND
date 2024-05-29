@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PrinterBackEnd.Data;
 
@@ -11,9 +12,11 @@ using PrinterBackEnd.Data;
 namespace PrinterBackEnd.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240529162637_RFIDLABEL")]
+    partial class RFIDLABEL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -234,7 +237,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_Areas", (string)null);
+                    b.ToTable("Cat_Areas");
                 });
 
             modelBuilder.Entity("PrinterBackEnd.Models.Domain.CatFolioConsec", b =>
@@ -259,7 +262,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_FolioConsec", (string)null);
+                    b.ToTable("Cat_FolioConsec");
                 });
 
             modelBuilder.Entity("PrinterBackEnd.Models.Domain.CatMaquina", b =>
@@ -290,7 +293,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_Maquinas", (string)null);
+                    b.ToTable("Cat_Maquinas");
                 });
 
             modelBuilder.Entity("PrinterBackEnd.Models.Domain.CatOperador", b =>
@@ -331,7 +334,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_Operadores", (string)null);
+                    b.ToTable("Cat_Operadores");
                 });
 
             modelBuilder.Entity("PrinterBackEnd.Models.Domain.CatOrden", b =>
@@ -360,7 +363,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_Ordenes", (string)null);
+                    b.ToTable("Cat_Ordenes");
                 });
 
             modelBuilder.Entity("PrinterBackEnd.Models.Domain.CatProducto", b =>
@@ -385,7 +388,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_Productos", (string)null);
+                    b.ToTable("Cat_Productos");
                 });
 
             modelBuilder.Entity("PrinterBackEnd.Models.Domain.CatTurno", b =>
@@ -402,7 +405,7 @@ namespace PrinterBackEnd.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cat_Turnos", (string)null);
+                    b.ToTable("Cat_Turnos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

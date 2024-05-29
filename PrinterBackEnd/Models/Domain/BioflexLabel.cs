@@ -61,24 +61,24 @@
         public string Turno { get; set; }
     }
 
-    public class ProdEtiquetasRFID 
+    public class ProdEtiquetasRFID
     {
         public int Id { get; set; }
-        public DateTime Area { get; set; } 
+        public DateTime Area { get; set; }
         public string DateTime { get; set; }
         public string ClaveProducto { get; set; }
         public string NombreProducto { get; set; }
         public string ClaveOperador { get; set; }
         public string Operador { get; set; }
         public string Turno { get; set; }
-        public string PesoTarima { get; set; }
-        public string PesoBruto { get; set; }
-        public string PesoNeto { get; set; }
-        public string Piezas { get; set; }
+        public float PesoTarima { get; set; }
+        public float PesoBruto { get; set; }
+        public float PesoNeto { get; set; }
+        public float Piezas { get; set; }
         public string Trazabilidad { get; set; }
         public string Orden { get; set; }
         public string RFID { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
     }
 
 }
