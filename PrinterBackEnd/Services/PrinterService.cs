@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using PrinterBackEnd.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using PrinterBackEnd.Models;
-using System.Text;
 using static PrinterBackEnd.Models.Printer;
+using System.Net.Sockets;
+using System.Text;
 
 namespace PrinterBackEnd.Services
 {
@@ -19,7 +20,7 @@ namespace PrinterBackEnd.Services
                 Interface = Printer.InterfaceType.TCPIP,
                 TCPIPAddress = printerSettings.IPAddress,
                 TCPIPPort = printerSettings.Port,
-                Timeout = printerSettings.Timeout * 2 // Increase timeout
+                Timeout = printerSettings.Timeout // Usar el timeout configurado
             };
             _logger = logger;
         }
@@ -33,9 +34,34 @@ namespace PrinterBackEnd.Services
                 _logger.LogInformation("Printer status retrieved successfully.");
                 return status;
             }
+            catch (SocketException se)
+            {
+                _logger.LogError(se, "Network error while retrieving printer status.");
+                throw new Exception("Network error while retrieving printer status.", se);
+            }
+            catch (TimeoutException te)
+            {
+                _logger.LogError(te, "Timeout while retrieving printer status.");
+                throw new Exception("Timeout while retrieving printer status.", te);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving printer status.");
+                throw; // Rethrow to allow the controller to catch and log it
+            }
+        }
+
+        public void SendPrintJob(byte[] data)
+        {
+            try
+            {
+                _logger.LogInformation("Attempting to send print job...");
+                _printer.Send(data);
+                _logger.LogInformation("Print job sent successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending print job.");
                 throw; // Rethrow to allow the controller to catch and log it
             }
         }

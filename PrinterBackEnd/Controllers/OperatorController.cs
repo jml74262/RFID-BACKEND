@@ -33,5 +33,21 @@ namespace PrinterBackEnd.Controllers
             }
         }
 
+        // Get all the operators from the 'Cat_Operadores' table
+        [HttpGet("all-operators")]
+        public async Task<ActionResult<IEnumerable<CatOperador>>> GetCatOperadores()
+        {
+            try
+            {
+                // Get all the operators from the 'Cat_Operadores' table
+                var operators = await _context.Cat_Operadores.ToListAsync();
+                return Ok(operators);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
     }
 }

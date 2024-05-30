@@ -35,7 +35,7 @@ namespace PrinterBackEnd.Models
 
         public Printer()
         {
-            interfaceConnection = new SocketHelper(false); // Update to match constructor
+            interfaceConnection = new SocketHelper(); // Utiliza el constructor predeterminado
         }
 
         public void OpenConnection()

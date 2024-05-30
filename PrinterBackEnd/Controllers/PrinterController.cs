@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO.Ports;
+using System.Management;
 using System.Net.Sockets;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
@@ -120,5 +122,57 @@ namespace PrinterBackEnd.Controllers
         {
             return "\x1B" + "CS\x0A";
         }
+
+        [HttpGet("GetSatoPrinter")]
+        public IActionResult GetSatoPrinter()
+        {
+            var devices = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE DeviceID LIKE 'USB%'")
+        .Get()
+        .OfType<ManagementObject>(); // Convert to IEnumerable<ManagementObject>
+
+            // Filter for "SATO" and get the first one
+            var satoPrinter = devices
+                .FirstOrDefault(device => device["Name"]?.ToString().Contains("SATO") == true);
+
+            if (satoPrinter != null)
+            {
+                var deviceId = satoPrinter["DeviceID"]?.ToString();
+                return Ok(deviceId); // Return the DeviceID of the SATO printer
+            }
+            else
+            {
+                return NotFound(); // Return NotFound if no SATO printer is found
+            }
+        }
+
+        [HttpPost("SendPrintCommand")]
+        public IActionResult SendPrintCommand([FromBody] string portName)
+        {
+            if (string.IsNullOrEmpty(portName) || !portName.StartsWith("COM"))
+            {
+                return BadRequest("Invalid port name.");
+            }
+
+            try
+            {
+                // Open the serial port
+                using (var serialPort = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One))
+                {
+                    serialPort.Open();
+
+                    // Example command to print "Hello, SATO!"
+                    string printCommand = "AV0100H0100L0202XCT4-LXQ1Z";
+                    serialPort.Write(printCommand);
+
+                    serialPort.Close();
+                }
+                return Ok("Print command sent successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error sending print command: {ex.Message}");
+            }
+        }
+
     }
 }
