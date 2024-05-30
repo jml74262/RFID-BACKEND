@@ -63,7 +63,15 @@ namespace PrinterBackEnd.Models
 
 
 
+
+
         }
+
+        //public List<Info> GetSATODrivers()
+        //{
+        //    List<Info> list = new List<Info>();
+        //    string text = "SELECT Name,DriverName,PortName,WorkOffline,Default,EnableBIDI from Win32_Printer WHERE DriverName LIKE '%SATO%'";
+        //}
 
         private static string ExtractIDs(string input, out string vid, out string pid)
         {

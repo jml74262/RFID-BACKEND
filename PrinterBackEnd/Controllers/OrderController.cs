@@ -40,5 +40,21 @@ namespace PrinterBackEnd.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+        // Create a get method that returns all 'Orden' from the 'Cat_Ordenes' table
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CatOrden>>> GetCatOrden()
+        {
+            try
+            {
+                // Get all the orders from the 'Cat_Ordenes' table
+                var orders = await _context.Cat_Ordenes.ToListAsync();
+                return Ok(orders);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }
