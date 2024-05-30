@@ -64,8 +64,8 @@
     public class ProdEtiquetasRFID
     {
         public int Id { get; set; }
-        public DateTime Area { get; set; }
-        public string DateTime { get; set; }
+        public string Area { get; set; }
+        public DateTime Fecha { get; set; } = DateTime.Now;
         public string ClaveProducto { get; set; }
         public string NombreProducto { get; set; }
         public string ClaveOperador { get; set; }

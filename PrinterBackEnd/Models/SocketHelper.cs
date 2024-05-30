@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Text;
 
 namespace PrinterBackEnd.Models
 {
@@ -8,7 +9,15 @@ namespace PrinterBackEnd.Models
         private TcpClient _client;
         private NetworkStream _stream;
 
-        public SocketHelper(bool PermanentConnect) : base(PermanentConnect) { }
+        // Constructor predeterminado
+        public SocketHelper() : base(false)
+        {
+        }
+
+        // Constructor que acepta isUDP y isPermanentConnect (por si es necesario)
+        public SocketHelper(bool isPermanentConnect) : base(isPermanentConnect)
+        {
+        }
 
         public override void Open(string ipAddress, object port, int timeout, int whichInterface)
         {

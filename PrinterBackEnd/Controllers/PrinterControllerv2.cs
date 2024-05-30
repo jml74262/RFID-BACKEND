@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using PrinterBackEnd.Models;
 using PrinterBackEnd.Services;
 using System;
+using System.IO;
+using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 
 [ApiController]
@@ -36,6 +40,43 @@ public class PrinterController : ControllerBase
         }
     }
 
+    [HttpPost("sendsimple")]
+    public async Task<IActionResult> SendSimpleCommand(LabelData labelData)
+    {
+        try
+        {
+            using var client = new TcpClient();
+            await client.ConnectAsync(labelData.PrinterIp, 9100); // Connect to printer
+
+            using var stream = client.GetStream();
+            var sbplCommand = GenerateSbplCommand(labelData); // Construct SBPL command
+            var data = System.Text.Encoding.ASCII.GetBytes(sbplCommand);
+            await stream.WriteAsync(data, 0, data.Length); // Send data to printer
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while sending the command to the printer: {ex.Message}");
+        }
+    }
+
+    string GenerateSbplCommand(LabelData labelData)
+    {
+        var sbplCommand = new StringBuilder();
+        sbplCommand.AppendLine("^XA"); // Start of label
+
+        // Print text command
+        sbplCommand.AppendLine($"^FO{labelData.XPosition},{labelData.YPosition}");
+        sbplCommand.AppendLine("^A0N,50,50"); // Font settings (adjust as needed)
+        sbplCommand.AppendLine($"^FD{labelData.TextToPrint}^FS");
+
+        // Add more SBPL commands for barcodes, images, etc. here
+
+        sbplCommand.AppendLine("^XZ"); // End of label
+        return sbplCommand.ToString();
+    }
+
     [HttpPost("send-command")]
     public async Task<IActionResult> SendCommandFromFile([FromQuery] string filePath)
     {
@@ -65,6 +106,20 @@ public class PrinterController : ControllerBase
         {
             _logger.LogError(ex, "An error occurred while sending the command from file.");
             return StatusCode(500, $"An error occurred while sending the command from file: {ex.Message}");
+        }
+    }
+
+    [HttpGet("GetActiveDeviceNames")]
+    public IActionResult GetActiveDeviceNames()
+    {
+        UsbInfo[] devices = USBSender.GetActiveDeviceNames();
+        if (devices.Length > 0)
+        {
+            return Ok(devices);
+        }
+        else
+        {
+            return NotFound("No active USB devices found.");
         }
     }
 }
