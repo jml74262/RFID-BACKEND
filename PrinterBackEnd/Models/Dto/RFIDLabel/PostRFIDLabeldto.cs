@@ -2,7 +2,6 @@
 {
     public class PostRFIDLabeldto
     {
-        public int Id { get; set; }
         public string Area { get; set; }
         public string ClaveProducto { get; set; }
         public string NombreProducto { get; set; }

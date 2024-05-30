@@ -2,13 +2,17 @@
 {
     public class UsbInfo
     {
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Vid { get; set; }
+        public string Pid { get; set; }
+        public string Sid { get; set; }
+        public string PortName { get; set; }
 
-        public UsbInfo(string name, string description)
+        public UsbInfo(string vid, string pid, string sid, string portName)
         {
-            Name = name;
-            Description = description;
+            Vid = vid;
+            Pid = pid;
+            Sid = sid;
+            PortName = portName;
         }
     }
 
