@@ -30,36 +30,39 @@ namespace PrinterBackEnd.Models
             var satoPrinter = devices
                 .FirstOrDefault(device => device["Name"]?.ToString().Contains("SATO") == true);
 
+            var deviceId = "";
 
-            List<UsbInfo> list = new List<UsbInfo>();
-            for (int i = 0; i < usbDeviceList; i++)
+            if (satoPrinter != null)
             {
-                string vid;
-                string pid;
-                string sid = ExtractIDs(array2[i], out vid, out pid);
-                if (!string.IsNullOrEmpty(vid) && !string.IsNullOrEmpty(pid))
+                deviceId = satoPrinter["DeviceID"]?.ToString();
+            }
+
+            // Here deviceId is something like "USB\\VID_0828&PID_014C\\YAFM1350", we need to extract VID and PID from it
+            var vid = "";
+            var pid = "";
+            var sid = "";
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                var match = Regex.Match(deviceId, @"VID_([0-9A-F]+)&PID_([0-9A-F]+)", RegexOptions.IgnoreCase);
+                if (match.Success)
                 {
-                    int vidInt;
-                    if (int.TryParse(vid, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out vidInt))
-                    {
-                        if (Array.Exists(VIDs, e => e == vidInt))
-                        {
-                            string name = array2[i];
-                            string portName = GetPortName(vid, pid, sid);
-                            if (portName != null)
-                            {
-                                name = portName;
-                            }
-                            list.Add(new UsbInfo(name, array2[i]));
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Failed to parse VID: {vid}");
-                    }
+                    vid = match.Groups[1].Value;
+                    pid = match.Groups[2].Value;
+                    sid = deviceId.Split('\\').Last();
                 }
             }
-            return list.ToArray();
+
+            using RegistryKey registryKey = Registry.LocalMachine.OpenSubKey("System\\CurrentControlSet\\Control\\DeviceClasses\\{28d78fad-5a12-11d1-ae5b-0000f803a8c2}");
+
+            var portName = GetPortName(vid, pid, sid);
+
+            return new UsbInfo[] { new UsbInfo(vid, pid, sid, portName) };
+
+            //return new UsbInfo[] { new UsbInfo(vid, pid, sid) };
+
+
+
+
         }
 
         private static string ExtractIDs(string input, out string vid, out string pid)

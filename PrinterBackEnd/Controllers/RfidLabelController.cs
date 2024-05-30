@@ -41,7 +41,6 @@ namespace PrinterBackEnd.Controllers
                 // Create a new 'ProdEtiquetasRFID' object
                 var postRFIDLabel = new ProdEtiquetasRFID
                 {
-                    Id = postRFIDLabeldto.Id,
                     Area = postRFIDLabeldto.Area,
                     ClaveProducto = postRFIDLabeldto.ClaveProducto,
                     NombreProducto = postRFIDLabeldto.NombreProducto,
@@ -57,6 +56,40 @@ namespace PrinterBackEnd.Controllers
                     RFID = postRFIDLabeldto.RFID,
                     Status = postRFIDLabeldto.Status,
                 };
+
+                await _context.SaveChangesAsync();
+                return Ok(postRFIDLabeldto);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        // Create a put method that receives a 'ProdEtiquetasRFID' object and updates it in the 'ProdEtiquetasRFID' table
+        [HttpPut]
+        public async Task<ActionResult<ProdEtiquetasRFID>> PutRFIDLabel(PostRFIDLabeldto postRFIDLabeldto)
+        {
+            try
+            {
+                // Get the 'ProdEtiquetasRFID' object where 'RFID' matches the 'RFID' parameter
+                var rfidLabel = await _context.ProdEtiquetasRFID.FirstOrDefaultAsync(x => x.RFID == postRFIDLabeldto.RFID);
+
+                // Update the 'ProdEtiquetasRFID' object
+                rfidLabel.Area = postRFIDLabeldto.Area;
+                rfidLabel.ClaveProducto = postRFIDLabeldto.ClaveProducto;
+                rfidLabel.NombreProducto = postRFIDLabeldto.NombreProducto;
+                rfidLabel.ClaveOperador = postRFIDLabeldto.ClaveOperador;
+                rfidLabel.Operador = postRFIDLabeldto.Operador;
+                rfidLabel.Turno = postRFIDLabeldto.Turno;
+                rfidLabel.PesoTarima = postRFIDLabeldto.PesoTarima;
+                rfidLabel.PesoBruto = postRFIDLabeldto.PesoBruto;
+                rfidLabel.PesoNeto = postRFIDLabeldto.PesoNeto;
+                rfidLabel.Piezas = postRFIDLabeldto.Piezas;
+                rfidLabel.Trazabilidad = postRFIDLabeldto.Trazabilidad;
+                rfidLabel.Orden = postRFIDLabeldto.Orden;
+                rfidLabel.RFID = postRFIDLabeldto.RFID;
+                rfidLabel.Status = postRFIDLabeldto.Status;
 
                 await _context.SaveChangesAsync();
                 return Ok(postRFIDLabeldto);
