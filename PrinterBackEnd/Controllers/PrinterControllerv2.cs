@@ -122,4 +122,18 @@ public class PrinterController : ControllerBase
             return NotFound("No active USB devices found.");
         }
     }
+
+    //[HttpGet("GetSATODrivers")]
+    //public IActionResult GetSATODrivers()
+    //{
+    //    string[] drivers = USBSender.GetSATODrivers();
+    //    if (drivers.Length > 0)
+    //    {
+    //        return Ok(drivers);
+    //    }
+    //    else
+    //    {
+    //        return NotFound("No SATO drivers found.");
+    //    }
+    //}
 }
