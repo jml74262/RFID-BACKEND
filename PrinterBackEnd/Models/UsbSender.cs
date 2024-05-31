@@ -1,10 +1,14 @@
 ﻿using Microsoft.Win32;
+using Org.LLRP.LTK.LLRPV1.DataType;
 using PrinterBackEnd.Models;
+using PrinterBackEnd.Models.Helpers;
+using PrinterBackEnd.Models.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Management;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace PrinterBackEnd.Models
@@ -67,11 +71,109 @@ namespace PrinterBackEnd.Models
 
         }
 
-        //public List<Info> GetSATODrivers()
-        //{
-        //    List<Info> list = new List<Info>();
-        //    string text = "SELECT Name,DriverName,PortName,WorkOffline,Default,EnableBIDI from Win32_Printer WHERE DriverName LIKE '%SATO%'";
-        //}
+        
+
+        public static List<InfoConx> GetSATODrivers()
+        {
+            List<InfoConx> list = new List<InfoConx>();
+            string text = "SELECT Name,DriverName,PortName,WorkOffline,Default,EnableBIDI from Win32_Printer WHERE DriverName LIKE '%SATO%'";
+
+            ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(text);
+
+            foreach (ManagementObject item in managementObjectSearcher.Get())
+            {
+                InfoConx info = new InfoConx();
+                info.PrinterModel = item["Name"].ToString();
+                info.DriverName = item["DriverName"].ToString();
+                info.PortName = item["PortName"].ToString();
+                info.Online = !Convert.ToBoolean(item["WorkOffline"]);
+                info.Default = Convert.ToBoolean(item["Default"]);
+                info.Bidirectional = Convert.ToBoolean(item["EnableBIDI"]);
+                list.Add(info);
+            }
+
+            return list;
+        }
+
+        // Create a method that gets SATODrives, selects the one where InfoConx.Online is true and sends the command to the printer
+        public static bool SendSATOCommand(string command)
+        {
+
+            byte[] cmddata = UtilsPersonalized.StringToByteArray(ControlCharReplace(command));
+            List<InfoConx> list = GetSATODrivers();
+            InfoConx infoConx = list.FirstOrDefault(x => x.Online);
+            if (infoConx != null)
+            {
+                //SendRawData(infoConx.DriverName, );
+                return true;
+            }
+            return false;
+        }
+
+        public static string ControlCharReplace(string data)
+        {
+            Dictionary<string, char> chrList = ControlCharList();
+            foreach (string key in chrList.Keys)
+            {
+                data = data.Replace(key, chrList[key].ToString());
+            }
+            return data;
+        }
+
+        public static Dictionary<string, char> ControlCharList()
+        {
+            Dictionary<string, char> ctr = new Dictionary<string, char>();
+            ctr.Add("[NUL]", '\u0000');
+            ctr.Add("[SOH]", '\u0001');
+            ctr.Add("[STX]", '\u0002');
+            ctr.Add("[ETX]", '\u0003');
+            ctr.Add("[EOT]", '\u0004');
+            ctr.Add("[ENQ]", '\u0005');
+            ctr.Add("[ACK]", '\u0006');
+            ctr.Add("[BEL]", '\u0007');
+            ctr.Add("[BS]", '\u0008');
+            ctr.Add("[HT]", '\u0009');
+            ctr.Add("[LF]", '\u000A');
+            ctr.Add("[VT]", '\u000B');
+            ctr.Add("[FF]", '\u000C');
+            ctr.Add("[CR]", '\u000D');
+            ctr.Add("[SO]", '\u000E');
+            ctr.Add("[SI]", '\u000F');
+            ctr.Add("[DLE]", '\u0010');
+            ctr.Add("[DC1]", '\u0011');
+            ctr.Add("[DC2]", '\u0012');
+            ctr.Add("[DC3]", '\u0013');
+            ctr.Add("[DC4]", '\u0014');
+            ctr.Add("[NAK]", '\u0015');
+            ctr.Add("[SYN]", '\u0016');
+            ctr.Add("[ETB]", '\u0017');
+            ctr.Add("[CAN]", '\u0018');
+            ctr.Add("[EM]", '\u0019');
+            ctr.Add("[SUB]", '\u001A');
+            ctr.Add("[ESC]", '\u001B');
+            ctr.Add("[FS]", '\u001C');
+            ctr.Add("[GS]", '\u001D');
+            ctr.Add("[RS]", '\u001E');
+            ctr.Add("[US]", '\u001F');
+            ctr.Add("[DEL]", '\u007F');
+            return ctr;
+        }
+
+
+
+        public bool SendRawData(string DriverName, string Data)
+        {
+            return RawPrinterHelper.SendStringToPrinter(DriverName, Data);
+        }
+
+        public bool SendRawData(string DriverName, byte[] Data)
+        {
+            IntPtr intPtr = new IntPtr(0);
+            int num = Data.Length;
+            intPtr = Marshal.AllocCoTaskMem(num);
+            Marshal.Copy(Data, 0, intPtr, num);
+            return RawPrinterHelper.SendBytesToPrinter(DriverName, intPtr, num);
+        }
 
         private static string ExtractIDs(string input, out string vid, out string pid)
         {
@@ -148,4 +250,6 @@ namespace PrinterBackEnd.Models
             return 1;
         }
     }
+
+
 }

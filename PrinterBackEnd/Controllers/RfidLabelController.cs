@@ -57,6 +57,8 @@ namespace PrinterBackEnd.Controllers
                     Status = postRFIDLabeldto.Status,
                 };
 
+                // Add the 'ProdEtiquetasRFID' object to the 'ProdEtiquetasRFID' table
+                _context.ProdEtiquetasRFID.Add(postRFIDLabel);
                 await _context.SaveChangesAsync();
                 return Ok(postRFIDLabeldto);
             }

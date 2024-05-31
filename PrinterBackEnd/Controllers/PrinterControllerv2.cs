@@ -123,17 +123,41 @@ public class PrinterController : ControllerBase
         }
     }
 
-    //[HttpGet("GetSATODrivers")]
-    //public IActionResult GetSATODrivers()
-    //{
-    //    string[] drivers = USBSender.GetSATODrivers();
-    //    if (drivers.Length > 0)
-    //    {
-    //        return Ok(drivers);
-    //    }
-    //    else
-    //    {
-    //        return NotFound("No SATO drivers found.");
-    //    }
-    //}
+    [HttpGet("GetSATODrivers")]
+    public IActionResult GetSATODrivers()
+    {
+        List<InfoConx> list = USBSender.GetSATODrivers();
+
+        if (list.Count > 0)
+        {
+            return Ok(list);
+        }
+        else
+        {
+            return NotFound("No SATO drivers found.");
+        }
+    }
+
+    // Post method to send command to SATO printer
+    [HttpPost("SendSATOCommand")]
+    public IActionResult SendSATOCommand(string satoCommand)
+    {
+        try
+        {
+            bool result = USBSender.SendSATOCommand(satoCommand);
+            if (result)
+            {
+                return Ok("Command sent successfully.");
+            }
+            else
+            {
+                return StatusCode(500, "Failed to send the command to the printer.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while sending the SATO command.");
+            return StatusCode(500, $"An error occurred while sending the SATO command: {ex.Message}");
+        }
+    }
 }
